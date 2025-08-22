@@ -1,12 +1,15 @@
 
   getwd()
-  setwd("C:\\Users\\Yohaan\\Downloads")
+setwd("C:\\Users\\Yohaan\\Downloads")
+#The readLines() function in R can be used to read some or all text lines from a connection object.
 fastadata<- readLines("random_fasta.fa")
+#Choose only header lines
 headers<- grep(">",fastadata) #returns their positions, thats why u see 1,4,and 7
 
+#+1 means look at the line after a header
 seq_start<- headers +1
 
-#headers[-1]removes the first element, giving c(4, 7).
+#headers[-1]removes the first element, giving the next two headersc(4, 7).
 #Why remove the first? Because we want to look at the next header for each sequence to know where it ends.
 #why (headers[-1] - 1)? Subtract 1 because the sequence ends just before the next header.
 #For example:seq1 starts at line 2, ends at 4 - 1 = 3
@@ -38,17 +41,24 @@ for (i in 1:length(headers)) {
 
 df <- data.frame(name = names, sequence = sequences, stringsAsFactors = FALSE)
 
+#toupper() converts all of the characters in a string in R to uppercase. Sometimes fasta files contain both upper and lowercase, so we do this for consistency
+df[c('sequence')] <- sapply(df[c('sequence')], function(x) toupper(x))
+
+
 library(stringr)
 
-Gcount<-sum( str_count(df$sequence, "g"))
-Acount<-sum( str_count(df$sequence, "a"))
-Tcount<- sum( str_count(df$sequence, "t"))
-Ccount<- sum( str_count(df$sequence, "c"))
+Gcount<-sum( str_count(df$sequence, "G"))
+Acount<-sum( str_count(df$sequence, "A"))
+Tcount<- sum( str_count(df$sequence, "T"))
+Ccount<- sum( str_count(df$sequence, "C"))
 GCcount<- Gcount+Ccount
 total_count<- Gcount+Tcount+Acount+Ccount
 
-GC<- sum( str_count(df$sequence, "gc"))
+GC<- sum( str_count(df$sequence, "GC"))
 
 total_pairs<- total_count - 2 #because there are 2 sequences
 #total_pairs <- sum(nchar(df$sequence) - 1) better formula i found, more applicable across more amounts of sequences, you dont have to count how many sequences you have
 GC_percent<- (GC/total_pairs)*100
+
+CG<- sum(str_count(df$sequence, "CG"))
+CG_percent<- (CG/total_pairs)*100
